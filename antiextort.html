@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1732 - Anti Extort</title>
+  <style>
+    body {
+      margin: 0;
+      background: repeating-linear-gradient(45deg, #000, #000 10px, #222 10px, #222 20px);
+      color: white;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      animation: glitchAnim 3s infinite linear;
+      padding: 1rem;
+      box-sizing: border-box;
+      filter: grayscale(100%);
+      position: relative;
+    }
+
+    @keyframes glitchAnim {
+      0%, 100% { background-position: 0 0; filter: grayscale(100%); }
+      25% { background-position: 50px 0; filter: grayscale(80%) contrast(120%); }
+      50% { background-position: 100px 100px; filter: grayscale(100%) contrast(100%); }
+      75% { background-position: 50px 50px; filter: grayscale(80%) contrast(130%); }
+    }
+
+    .container {
+      background-color: rgba(0, 0, 0, 0.85);
+      border: 1px solid white;
+      padding: 2rem;
+      width: 90%;
+      max-width: 500px;
+      margin-top: 3rem;
+      box-shadow: 0 0 10px white, 0 0 20px white inset;
+      border-radius: 8px;
+      box-sizing: border-box;
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      font-size: 3rem;
+      text-align: center;
+      position: relative;
+      margin-bottom: 2rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-shadow: 2px 0 white, -2px 0 white;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      margin-bottom: 1.2rem;
+      border: 1px solid white;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 1rem;
+      font-family: 'Courier New', Courier, monospace;
+      border-radius: 4px;
+      outline: none;
+      resize: vertical;
+    }
+
+    button {
+      width: 100%;
+      padding: 1rem;
+      background: transparent;
+      border: 2px solid white;
+      color: white;
+      font-weight: 900;
+      font-size: 1.2rem;
+      font-family: 'Courier New', Courier, monospace;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: white;
+      color: black;
+    }
+
+    .success {
+      color: white;
+      text-align: center;
+      font-weight: bold;
+      margin-top: 1rem;
+    }
+
+    #clock {
+      font-size: 1rem;
+      margin-top: 1rem;
+      text-shadow: 0 0 3px white;
+      text-align: center;
+      user-select: none;
+    }
+
+    /* Tip Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+      background-color: rgba(0, 0, 0, 0.9);
+      border: 1px solid white;
+      padding: 2rem;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 10px white, 0 0 20px white inset;
+      border-radius: 8px;
+      box-sizing: border-box;
+      text-align: center;
+      color: white;
+      font-family: 'Courier New', Courier, monospace;
+      position: relative;
+    }
+
+    .modal-content h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-shadow: 2px 0 white, -2px 0 white;
+    }
+
+    .wallet-address {
+      font-size: 1rem;
+      word-break: break-word;
+      margin-bottom: 1.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.8rem;
+      border-radius: 4px;
+      user-select: all;
+      font-family: monospace;
+    }
+
+    .qr-code {
+      width: 250px;
+      height: 250px;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 0 2px white);
+    }
+
+    .close-button {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 2rem;
+      cursor: pointer;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .close-button:hover {
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <h1>ANTI EXTORT</h1>
+    <label for="discord" style="display:none;">Discord Username</label>
+    <input
+      type="text"
+      id="discord"
+      name="discord"
+      placeholder="Discord Username (e.g., user)"
+      autocomplete="off"
+      aria-required="true"
+      aria-describedby="discordHelp"
+    />
+    <span id="discordHelp" style="font-size:0.8rem; color:#ccc; display:block; margin-bottom:1rem;">
+      Enter your Discord username without the #tag
+    </span>
+    <label for="message" style="display:none;">Message</label>
+    <textarea
+      id="message"
+      name="message"
+      placeholder="What do you need?"
+      rows="5"
+      aria-required="true"
+    ></textarea>
+    <button type="button" onclick="sendMessage()">Send</button>
+    <p id="response" class="success" style="display: none;" role="alert" aria-live="polite"></p>
+    <div id="clock" aria-live="polite" aria-atomic="true" aria-label="Local time"></div>
+  </div>
+
+  <button class="tip-button" aria-label="Open tip page" onclick="openTipModal()">Click Me</button>
+
+  <!-- Tip Modal -->
+  <div class="modal-overlay" id="tipModal" role="dialog" aria-modal="true" aria-labelledby="tipModalTitle" tabindex="-1">
+    <div class="modal-content">
+      <button class="close-button" aria-label="Close tip modal" onclick="closeTipModal()">&times;</button>
+      <h2 id="tipModalTitle">TIP ME</h2>
+      <div class="wallet-address" id="walletAddress">Be8i5YQ4pYdWnUx6kupW1Y5BLKJdNmoErM3HCHuKCEsc</div>
+      <img
+        class="qr-code"
+        id="qrCode"
+        alt="QR Code for Wallet"
+        src=""
+        aria-label="QR code of Tether SOL wallet address"
+      />
+      <button onclick="closeTipModal()">Back</button>
+    </div>
+  </div>
+
+  <script>
+    const TELEGRAM_BOT_TOKEN = '8395760817:AAFe1M_YCXdqxDpno5EKNJ4PairARNQV1ts';
+    const TELEGRAM_CHAT_ID = '6037000451';
+
+    let userIPInfo = null;
+    let userTimezone = 'UTC';
+
+    function updateClock() {
+      const now = new Date();
+      const options = { timeZone: userTimezone, hour12: false, year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+      const timeString = now.toLocaleString('en-US', options);
+      document.getElementById('clock').textContent = `Your Local Time: ${timeString}`;
+    }
+
+    async function sendMessage() {
+      const discord = document.getElementById('discord').value.trim();
+      const message = document.getElementById('message').value.trim();
+      const responseEl = document.getElementById('response');
+
+      responseEl.style.display = 'none';
+      if (!discord || !message) {
+        alert('Please fill out all fields.');
+        return;
+      }
+
+      const locationInfo = userIPInfo
+        ? `🌍 *IP Info:*\nIP: ${userIPInfo.ip}\nCity: ${userIPInfo.city}\nCountry: ${userIPInfo.country_name}\nTimezone: ${userIPInfo.timezone}`
+        : '';
+
+      const text = `🚨 *New Submission:*\n👤 *Discord:* ${discord}\n💬 *Message:* ${message}\n${locationInfo}`;
+
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: TELEGRAM_CHAT_ID,
+            text: text,
+            parse_mode: 'Markdown'
+          }),
+        });
+
+        const data = await res.json();
+
+        if (data.ok) {
+          responseEl.textContent = '✅ Message sent to Telegram!';
+          responseEl.style.display = 'block';
+          document.getElementById('discord').value = '';
+          document.getElementById('message').value = '';
+        } else {
+          responseEl.textContent = `❌ Telegram error: ${data.description}`;
+          responseEl.style.display = 'block';
+        }
+      } catch (err) {
+        responseEl.textContent = '❌ Network error occurred.';
+        responseEl.style.display = 'block';
+      }
+    }
+
+    // Fetch IP info for location/timezone
+    fetch('https://ipapi.co/json/')
+      .then(response => response.json())
+      .then(data => {
+        userIPInfo = data;
+        userTimezone = data.timezone || 'UTC';
+        updateClock();
+        setInterval(updateClock, 1000);
+      })
+      .catch(() => {
+        updateClock();
+        setInterval(updateClock, 1000);
+      });
+
+    // Modal controls
+    const tipModal = document.getElementById('tipModal');
+    const qrCodeImg = document.getElementById('qrCode');
+
+    function openTipModal() {
+      const wallet = document.getElementById('walletAddress').textContent.trim();
+      qrCodeImg.src = `https://chart.googleapis.com/chart?cht=qr&chs=250x250&chl=${encodeURIComponent(wallet)}&chld=L|1`;
+
+      tipModal.style.display = 'flex';
+      tipModal.focus();
+    }
+
+    function closeTipModal() {
+      tipModal.style.display = 'none';
+    }
+
+    // Accessibility: close modal on ESC key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && tipModal.style.display === 'flex') {
+        closeTipModal();
+      }
+    });
+  </script>
+</body>
+</html>
